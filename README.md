@@ -1,13 +1,12 @@
 # Music recognizer 
 
-##Usage
+##Використання
 
 
 Запуск проект:
 
 https://hak-test-litvin-kaverinsky.herokuapp.com/core
 
-Subsequent reaponse definition will only detail the expected value of the `data_field`
 
 ### АPI, які були використані
 

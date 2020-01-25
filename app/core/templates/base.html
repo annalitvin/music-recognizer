@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% load static %}
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <title>Mountain King - Bootstrap Template</title>
+        <!-- Bootstrap core CSS -->
+        <link href="{% static 'bootstrap/css/theme.css' %}" rel="stylesheet">
+        <!-- Custom styles for this template -->
+        <link href="{% static 'style.css' %}" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+        <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,300,700,100' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Raleway:300,700,900,500' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/typicons/2.0.7/typicons.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="{% static 'assets/css/pushy.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/masonry.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/animate.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/magnific-popup.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/odometer-theme-default.css' %}">
+
+    </head>
+    <body>
+
+      <div class="site-overlay"></div>
+
+        <header id="home">
+            <div class="container-fluid">
+
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-3 col-xs-10">
+                            <a href="#" class="thumbnail logo">
+                                <img src="{% static 'images/your_logo.png' %}" alt="" class="img-responsive">
+                            </a>
+                        </div>
+                        <div class="col-md-1 col-md-offset-8 col-xs-2 text-center">
+
+                        </div>
+                    </div>
+
+                    <div class="jumbotron music_loader">
+
+                    </div>
+                    <div id="search-background" class="jumbotron jumbotron-fluid">
+
+                      <div class="row">
+
+                        <form method="POST" action='/core/' id='text_rekogn'>
+
+                          <div class="form-group">
+                            <div class="form-row">
+                              <div class="form-group col-md-6">
+                                <label for="inputEmail4"><strong>Введіть рядок для пошуку</strong></label>
+                                <input type="text" class="form-control" id="inputext" placeholder="Текст">
+                                <p><button type="submit" class="btn btn-primary btn-md"><strong>Пошук</strong></button></p>
+                              </div>
+                            </div>
+                        </div>
+                        </form>
+                        <div class="form-group">
+                          <label for="inputPassword4">Говоріть у мікрофон</label>
+                          <div id="audio"></div>
+                          <button id="start">Начать запись</button>
+                          <button id="stop">Остановить запись</button>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+
+        <script src="{% static 'assets/js/jquery.min.js' %}"></script>
+        <script src="bootstrap/js/bootstrap.min.js"></script>
+        <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.0.4/js/bootstrap-scrollspy.js"></script>
+
+        <script src="{% static 'assets/js/ie10-viewport-bug-workaround.js' %}"></script>
+        <script src="http://masonry.desandro.com/masonry.pkgd.js"></script>
+        <script src="{% static 'assets/js/masonry.js' %}"></script>
+        <script src="{% static 'assets/js/pushy.min.js' %}"></script>
+        <script src="{% static 'assets/js/jquery.magnific-popup.min.js' %}"></script>
+        <script src="{% static 'assets/js/wow.min.js' %}"></script>
+        <script src="{% static 'assets/js/scripts.js' %}"></script>
+        <script src="{% static 'assets/js/odometer.js' %}"></script>
+        <script>
+
+              $(document).on('submit', '#text_rekogn',function(e){
+                  e.preventDefault();
+                  $.ajax({
+                      type:'POST',
+                      url:'/core/',
+                      data:{
+                          input_text:$('#inputext').val(),
+                          action: 'post'
+                      },
+                      success:function(json){
+
+                          $(".music_loader").empty();
+
+                          document.getElementById("text_rekogn").reset();
+                          $(".music_loader").append('<iframe id="music_loader", scrolling="no" frameborder="0" allowTransparency="true"'+
+                          'src="https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=false&width=700&height=350&color=ff0000&layout=dark&size=medium&type=tracks&id=' +
+                          json.song_id + '&app_id=1" width="700" height="90"></iframe>'
+                      )
+
+                      },
+                      error : function(xhr,errmsg,err) {
+
+                        console.log(xhr.status + ": " + xhr.responseText);
+                  }
+                  });
+              });
+
+
+        </script>
+        <script>
+
+
+            navigator.mediaDevices.getUserMedia({ audio: true})
+                 .then(stream => {
+                const mediaRecorder = new MediaRecorder(stream);
+
+                document.querySelector('#start').addEventListener('click', function(){
+                  mediaRecorder.start();
+                });
+              var audioChunks = [];
+              mediaRecorder.addEventListener("dataavailable",function(event) {
+                  audioChunks.push(event.data);
+                  console.log(audioChunks);
+              });
+
+              mediaRecorder.addEventListener("stop", function() {
+
+                  console.log(audioChunks);
+                  const audioBlob = new Blob(audioChunks, {type: 'audio/wav'});
+                  const audioUrl = URL.createObjectURL(audioBlob);
+
+                  var reader = new FileReader();
+                  reader.addEventListener("loadend", function() {
+
+
+                    var data = reader.result;
+
+                    var fd = new FormData();
+                    fd.append('data', data);
+                    fd.append('action', 'get_file_body');
+                    $.ajax({
+                        type: 'POST',
+                        url: '/core/',
+                        data: fd,
+                        processData: false,
+                        contentType: false
+                    }).done(function(json) {
+
+                        $(".music_loader").empty()
+
+                        $(".music_loader").append('<iframe id="music_loader", scrolling="no" frameborder="0" allowTransparency="true"'+
+                        'src="https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=false&width=700&height=350&color=ff0000&layout=dark&size=medium&type=tracks&id=' +
+                        json.deezer_id + '&app_id=1" width="700" height="90"></iframe>')
+
+                    });
+
+                  });
+
+                  reader.readAsDataURL(audioBlob);
+                   audioChunks = [];
+            });
+              document.querySelector('#stop').addEventListener('click', function(){
+
+                   mediaRecorder.stop();
+                });
+
+            });
+
+        </script>
+
+    </body>
+
+</html>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-34344036-1', 'auto');
+  ga('send', 'pageview');
+
+</script>

@@ -113,6 +113,11 @@ header .container-fluid
   opacity: 0.8;
 }
 
+#not-found {
+  font-size: 2.3em;
+  color: #000;
+}
+
 
 /*------------------------------------*\
 	SECTIONS

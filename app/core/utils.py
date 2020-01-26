@@ -18,7 +18,7 @@ def get_lyrics(lyrics):
     if len(result) > 0:
         for result_item in result:
             current_lyrics = result_item.get('lyrics')
-            if lyrics in current_lyrics:
+            if lyrics.lower() in current_lyrics.lower():
                 artists.append(
                     {'track_title': result_item.get('title'),
                     'track_artist': result_item.get('artist')
@@ -38,9 +38,9 @@ def get_lyrics(lyrics):
             for data_item in data:
                 title_data = data_item.get('title')
                 artist_data = data_item.get('artist')
-                if artist_data.get('name') == artist:
+                if artist_data.get('name').lower() == artist.lower():
                     if title_data is not None and title is not None:
-                        if title_data in title or title in title_data:
+                        if title_data.lower() in title.lower() or title.lower() in title_data.lower():
                             return data_item.get("id")
 
 

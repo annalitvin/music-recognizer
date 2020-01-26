@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="">
         <meta name="author" content="">
-        <title>Mountain King - Bootstrap Template</title>
+        <title>Music recognizer</title>
         <!-- Bootstrap core CSS -->
         <link href="{% static 'bootstrap/css/theme.css' %}" rel="stylesheet">
         <!-- Custom styles for this template -->
@@ -103,18 +103,20 @@
                           action: 'post'
                       },
                       success:function(json){
-
-                          $(".music_loader").empty();
-
                           document.getElementById("text_rekogn").reset();
-                          $(".music_loader").append('<iframe id="music_loader", scrolling="no" frameborder="0" allowTransparency="true"'+
-                          'src="https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=false&width=700&height=350&color=ff0000&layout=dark&size=medium&type=tracks&id=' +
-                          json.song_id + '&app_id=1" width="700" height="90"></iframe>'
-                      )
+                          $(".music_loader").empty();
+                          var song_id = json.song_id;
+
+                          if (song_id == null) {
+                              $(".music_loader").append('<p id="not-found"><strong>Композицію не знайдено спробуйте знов!</strong></p>');
+                          } else {
+                            $(".music_loader").append('<iframe id="music_loader", scrolling="no" frameborder="0" allowTransparency="true"'+
+                            'src="https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=false&width=700&height=350&color=ff0000&layout=dark&size=medium&type=tracks&id=' +
+                            song_id + '&app_id=1" width="80%" height="90"></iframe>');
+                          }
 
                       },
                       error : function(xhr,errmsg,err) {
-
                         console.log(xhr.status + ": " + xhr.responseText);
                   }
                   });
@@ -161,8 +163,7 @@
                         contentType: false
                     }).done(function(json) {
 
-                        $(".music_loader").empty()
-
+                        $(".music_loader").empty();
                         $(".music_loader").append('<iframe id="music_loader", scrolling="no" frameborder="0" allowTransparency="true"'+
                         'src="https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=false&width=700&height=350&color=ff0000&layout=dark&size=medium&type=tracks&id=' +
                         json.deezer_id + '&app_id=1" width="700" height="90"></iframe>')

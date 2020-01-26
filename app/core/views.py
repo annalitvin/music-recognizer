@@ -26,7 +26,6 @@ def index(request):
 
         lyrics = request.POST.get('input_text')
         audio_data = request.POST.get('data')
-
         rec_result = get_lyrics(lyrics)
 
         return JsonResponse({'song_id': rec_result})

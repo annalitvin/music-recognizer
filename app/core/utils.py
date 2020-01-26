@@ -7,7 +7,7 @@ def get_lyrics(lyrics):
         data = {
             'q': str(lyrics),
             'return':'timecode,apple_music,deezer,spotify',
-            'api_token': 'f9d05c0e0df19edf712ee220b4e30cac'
+            'api_token': 'f2459ae0fc49b06829ff9f11085b9cfa'
             }
     result = requests.post('https://api.audd.io/findLyrics/', data=data)
 
@@ -17,8 +17,8 @@ def get_lyrics(lyrics):
 
     if len(result) > 0:
         for result_item in result:
-            current_lyrics = result_item.get('lyrics')
-            if lyrics.lower() in current_lyrics.lower():
+            current_lyrics = result_item.get('lyrics').strip()
+            if lyrics.lower().strip() in current_lyrics.lower():
                 artists.append(
                     {'track_title': result_item.get('title'),
                     'track_artist': result_item.get('artist')

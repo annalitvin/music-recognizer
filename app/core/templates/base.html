@@ -38,7 +38,7 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-md-3 col-xs-10">
-                            <a href="#" class="thumbnail logo">
+                            <a href="" class="thumbnail logo">
                                 <img src="{% static 'images/your_logo.png' %}" alt="" class="img-responsive">
                             </a>
                         </div>
@@ -61,7 +61,7 @@
                               <div class="form-group col-md-6">
                                 <label for="inputEmail4"><strong>Введіть рядок для пошуку</strong></label>
                                 <input type="text" class="form-control" id="inputext" placeholder="Текст">
-                                <p><button type="submit" class="btn btn-primary btn-md"><strong>Пошук</strong></button></p>
+                                <p><button id="search" type="submit" class="btn btn-primary btn-md"><strong>Пошук</strong></button></p>
                               </div>
                             </div>
                         </div>
@@ -73,6 +73,8 @@
                           <button id="stop">Зупинити запис</button>
                         </div>
                       </div>
+
+                      <p id="game-toggle"></p>
                     </div>
                 </div>
             </div>
@@ -95,6 +97,10 @@
 
               $(document).on('submit', '#text_rekogn',function(e){
                   e.preventDefault();
+                  $("#search").attr("disabled", true);
+                  $(".music_loader").empty();
+                  $(".music_loader").append('<div id="loader"></div>');
+
                   $.ajax({
                       type:'POST',
                       url:'/core/',
@@ -103,17 +109,56 @@
                           action: 'post'
                       },
                       success:function(json){
-                          document.getElementById("text_rekogn").reset();
                           $(".music_loader").empty();
-                          var song_id = json.song_id;
+                          document.getElementById("text_rekogn").reset();
 
-                          if (song_id == null) {
+                          var song_id_list = json.song_id;
+                          var unique = song_id_list.filter((v, i, a) => a.indexOf(v) === i);
+
+                          if (unique == null || unique.length == 0) {
                               $(".music_loader").append('<p id="not-found"><strong>Композицію не знайдено спробуйте знов!</strong></p>');
                           } else {
-                            $(".music_loader").append('<iframe id="music_loader", scrolling="no" frameborder="0" allowTransparency="true"'+
-                            'src="https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=false&width=700&height=350&color=ff0000&layout=dark&size=medium&type=tracks&id=' +
-                            song_id + '&app_id=1" width="80%" height="90"></iframe>');
+                              $(".music_loader").append('<iframe id="music_loader", scrolling="no" frameborder="0" allowTransparency="true"'+
+                              'src="https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=false&width=700&height=350&color=ff0000&layout=dark&size=medium&type=tracks&id=' +
+                              unique[0] + '&app_id=1" width="80%" height="90"></iframe>');
+                              $("#game-toggle").append('<a id="yes" class="btn btn-primary btn-lg" role="button">Вгадав</a> <a id="no" class="btn btn-lg btn-danger" role="button" onclick="guessNo();">Не вгадав</a>');
+
+                              var count = 1;
+                              document.getElementById("no").addEventListener('click', function(){
+
+                                  $(".music_loader").empty();
+
+                                  if (count == 4) {
+                                    console.log(count);
+                                    $("#game-toggle").empty();
+                                    $(".music_loader").append('<p id="not-found"><strong>Досягнута максимальна кількість спроб!</strong></p>');
+                                    return;
+                                  }
+
+                                  console.log(count);
+
+                                  if (count == song_id_list.length) {
+                                    $(".music_loader").append('<p id="not-found"><strong>Композицій більше немає! <br>Переміг користувач.</strong></p>');
+                                    $("#game-toggle").empty();
+                                    return;
+                                  }
+
+                                  $(".music_loader").append('<iframe id="music_loader", scrolling="no" frameborder="0" allowTransparency="true"'+
+                                  'src="https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=false&width=700&height=350&color=ff0000&layout=dark&size=medium&type=tracks&id=' +
+                                  unique[count] + '&app_id=1" width="80%" height="90"></iframe>');
+
+                                  count++;
+                                });
+
+                                document.getElementById("yes").addEventListener('click', function(){
+                                    $(".music_loader").empty();
+                                    $("#game-toggle").empty();
+                                    $(".music_loader").append('<p id="not-found"><strong>Переміг додаток!</strong></p>');
+                                    return;
+                                });
                           }
+
+                          $("#search").attr("disabled", false);
 
                       },
                       error : function(xhr,errmsg,err) {
@@ -132,6 +177,10 @@
                 const mediaRecorder = new MediaRecorder(stream);
 
                 document.querySelector('#start').addEventListener('click', function(){
+
+                  $(".music_loader").empty();
+                  $("#start").attr("disabled", true);
+                  $("#stop").attr("disabled", false);
                   mediaRecorder.start();
                 });
               var audioChunks = [];
@@ -143,6 +192,9 @@
               mediaRecorder.addEventListener("stop", function() {
 
                   console.log(audioChunks);
+                  $("#start").attr("disabled", false);
+                  $(".music_loader").empty();
+                  $(".music_loader").append('<div id="loader"></div>');
                   const audioBlob = new Blob(audioChunks, {type: 'audio/wav'});
                   const audioUrl = URL.createObjectURL(audioBlob);
 
@@ -163,7 +215,6 @@
                         contentType: false
                     }).done(function(json) {
                         $(".music_loader").empty();
-
                         var deezer_id = json.deezer_id;
 
                         if (deezer_id == null) {
@@ -171,7 +222,26 @@
                         } else {
                           $(".music_loader").append('<iframe id="music_loader", scrolling="no" frameborder="0" allowTransparency="true"'+
                           'src="https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=false&width=700&height=350&color=ff0000&layout=dark&size=medium&type=tracks&id=' +
-                          deezer_id + '&app_id=1" width="80%" height="90"></iframe>')
+                          deezer_id + '&app_id=1" width="80%" height="90"></iframe>');
+
+                          $("#game-toggle").append('<a id="yes" class="btn btn-primary btn-lg" role="button">Вгадав</a> <a id="no" class="btn btn-lg btn-danger" role="button" onclick="guessNo();">Не вгадав</a>');
+
+                          var count = 1;
+                          document.getElementById("no").addEventListener('click', function(){
+
+                              $(".music_loader").empty();
+                              $("#game-toggle").empty();
+                              $(".music_loader").append('<p id="not-found"><strong>Переміг користувач!</strong></p>');
+                              return;
+
+                            });
+
+                            document.getElementById("yes").addEventListener('click', function(){
+                                $(".music_loader").empty();
+                                $("#game-toggle").empty();
+                                $(".music_loader").append('<p id="not-found"><strong>Переміг додаток!</strong></p>');
+                                return;
+                            });
                         }
 
                     });
@@ -179,7 +249,9 @@
                   });
 
                   reader.readAsDataURL(audioBlob);
-                   audioChunks = [];
+                  audioChunks = [];
+
+                  $("#stop").attr("disabled", true);
             });
               document.querySelector('#stop').addEventListener('click', function(){
 
